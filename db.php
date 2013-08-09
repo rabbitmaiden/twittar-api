@@ -10,6 +10,11 @@ function db() {
     return $db;
 }
 
+function error($msg) {
+    error_log("Error: $msg");
+    return array("error"=>$msg);
+}
+
 function create_user($username, $password, $icon = null) {
     $db = db();
 
@@ -18,7 +23,7 @@ function create_user($username, $password, $icon = null) {
     $query = "SELECT 1 FROM user WHERE username = '".mysqli_real_escape_string($db, $username)."'";
     $result = mysqli_query($db, $query);
     if (mysqli_num_rows($result)) {
-        return array("error"=>"Username is already taken"); 
+        return error("Username is already taken"); 
     }
 
     $query = "INSERT INTO user (username, password, icon) VALUES
@@ -29,7 +34,7 @@ function create_user($username, $password, $icon = null) {
     $result = mysqli_query($db, $query);
     if(mysqli_affected_rows($db) != 1){
         error_log("Create user failed: ".mysqli_error($db));
-        return false;
+        return error("Create User failed");
     }
     
     $userid = mysqli_insert_id($db);
@@ -37,22 +42,6 @@ function create_user($username, $password, $icon = null) {
     $token = generate_token($userid, $password);
 
     return array('id'=>$userid, 'token'=>$token);
-}
-
-function create_post($author, $body, $private = 0, $replyto = null, $replyparent = null) {
-    $db = db();
-
-    $query = "INSERT INTO messages (author, body, private, replyto, replyparent) VALUES
-        ('".mysqli_real_escape_string($db, $author)."',
-         '".mysqli_real_escape_string($db, $body)."',
-         '".mysqli_real_escape_string($db, $private)."',
-         '".mysqli_real_escape_string($db, $replyto)."',
-         '".mysqli_real_escape_string($db, $replyparent)."')";
-    $result = mysqli_query($db, $query) or error_log(mysqli_error($db));
-
-    // TODO: Insert into follower queues
-
-    // TODO: Insert into public queue
 }
 
 
@@ -73,7 +62,37 @@ function validate_token($id, $token) {
             return true;
         }
     }
-    return array("error"=> "Invalid Token");
+    return error("Invalid Token");
 }
+
+
+function create_post($author, $body, $private = 0, $replyto = null, $replyparent = null) {
+    $db = db();
+
+    $query = "INSERT INTO messages (author, body, private, replyto, replyparent) VALUES
+        ('".mysqli_real_escape_string($db, $author)."',
+         '".mysqli_real_escape_string($db, $body)."',
+         '".mysqli_real_escape_string($db, $private)."',
+         '".mysqli_real_escape_string($db, $replyto)."',
+         '".mysqli_real_escape_string($db, $replyparent)."')";
+    $result = mysqli_query($db, $query) or error_log(mysqli_error($db));
+
+    if (mysqli_affected_rows($db)!= 1){
+        error_log("Create post failed: ".mysqli_error($db));
+        return error("Create post failed!");
+    }    
+
+    $id = mysqli_insert_id($db);
+
+    // TODO: Insert into follower queues
+
+    // TODO: Insert into public queue
+
+    return $id;
+
+}
+
+
+
 
 ?>
