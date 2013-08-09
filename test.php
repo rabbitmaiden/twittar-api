@@ -20,3 +20,7 @@ $body = "FIRST!!!!111";
 $result = create_post($user['id'], $body, 0);
 
 var_dump($result);
+
+$follow = create_follow('1', $user['id']);
+
+var_dump($follow);

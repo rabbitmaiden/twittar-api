@@ -65,7 +65,17 @@ function validate_token($id, $token) {
 }
 
 function create_follow($frodo, $samwise) {
-    $query = "";
+    $db = db();
+    $query = "INSERT INTO follows VALUES (".
+            "'".mysqli_real_escape_string($db, $frodo)."',".
+            "'".mysqli_real_escape_string($db, $frodo)."')";
+
+    $result = mysqli_query($db, $query);
+    if(mysqli_affected_rows($db)!=1){
+        error_log("Create follow failed: ".mysqli_error($db));
+        return error("Create follow failed!");
+    }
+    return true;
 }
 
 
