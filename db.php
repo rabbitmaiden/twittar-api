@@ -163,6 +163,7 @@ function get_user($id) {
 }
 
 function get_followers($frodo) {
+    $db = db();
     $query = "SELECT samwise FROM follows WHERE frodo='".mysqli_real_escape_string($db, $frodo)."'";
     $result = mysqli_query($db, $query);
     if(empty($result)){
