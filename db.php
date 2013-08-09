@@ -44,7 +44,6 @@ function create_user($username, $password, $icon = null) {
     return array('id'=>$userid, 'token'=>$token);
 }
 
-
 function generate_token($id, $pass) {
     $token = sha1($id.$pass.SECRET);
     return $token;
@@ -63,6 +62,10 @@ function validate_token($id, $token) {
         }
     }
     return error("Invalid Token");
+}
+
+function create_follow($frodo, $samwise) {
+    $query = "";
 }
 
 
