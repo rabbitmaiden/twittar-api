@@ -117,13 +117,13 @@ function create_post($author, $body, $private = 0, $replyto = null) {
     // FIXME: Mentions
 
 
-    // Insert into own queue
-    $query = "INSERT INTO queue (owner, message) VALUES (
-        '".mysqli_real_escape_string($db, $author)."',
-        '".mysqli_real_escape_string($db, $id)."')";
-    mysqli_query($db, $query);
-
     if (empty($replyto) && empty($private)){
+        // Insert into own queue
+        $query = "INSERT INTO queue (owner, message) VALUES (
+            '".mysqli_real_escape_string($db, $author)."',
+            '".mysqli_real_escape_string($db, $id)."')";
+        mysqli_query($db, $query);
+
 
         $query = "SELECT samwise FROM follows WHERE frodo='".mysqli_real_escape_string($db, $author)."'";
         $result = mysqli_query($db, $query);
@@ -158,7 +158,7 @@ function get_user($id) {
     // Redis here?
 
     $db = db();
-    $query = "SELECT id, username, icon FROM user WHERE id='".mysqli_real_escape_string($db, $id).'"';
+    $query = "SELECT id, username, icon FROM user WHERE id='".mysqli_real_escape_string($db, $id)."'";
     $result = mysqli_query($db, $query);
     if(mysqli_num_rows($result)!=1){
         return false;
@@ -168,9 +168,52 @@ function get_user($id) {
     return $user;
 }
 
-function get_user_queue($id, $offset = 0){
-   
+function get_post($id) {
+    $db = db();
+    $query = "SELECT * FROM messages WHERE id='".mysqli_real_escape_string($db, $id)."'";
+    $result = mysqli_query($db, $query);
+    if(mysqli_num_rows($result)!=1){
+        return false;
+    }
+    $post = mysqli_fetch_assoc($result);
+    $post['author'] = get_user($post['author']);
 
+    // Get replies
+    $query = "SELECT id FROM messages WHERE replyto='".mysqli_real_escape_string($db, $id)."'";
+    $result = mysqli_query($db, $query);
+    if(mysqli_num_rows($result)>0){
+        $post['replies'] = array();
+        while($row = mysqli_fetch_row($result)){
+            $replyid = $row[0];
+            $post['replies'][] = get_post($replyid);
+        }
+    }
+    return $post;
+}
+
+function get_user_queue($id, $offset = 0){
+    $db = db();
+    $query = "SELECT message FROM queue WHERE owner='".mysqli_real_escape_string($db, $id)."'";
+
+    $offset = intval($offset);
+    if(!empty($offset) && $offset > 0 ){
+        $query .= ' OFFSET '.mysqli_real_escape_string($db, $offset);
+    }
+    
+    $query .= "ORDER BY message DESC";
+
+    $result = mysqli_query($db, $query);
+    
+    if(!empty($result)){
+        return error("Could not load user queue for user $id");
+    }
+
+    $posts = array();
+    while ($row = mysqli_fetch_row($result)) {
+        $posts[] = get_post($row[0]);
+    }
+
+    return $posts;
 }
 
 
