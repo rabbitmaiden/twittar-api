@@ -68,7 +68,7 @@ function create_follow($frodo, $samwise) {
     $db = db();
     $query = "INSERT INTO follows VALUES (".
             "'".mysqli_real_escape_string($db, $frodo)."',".
-            "'".mysqli_real_escape_string($db, $frodo)."')";
+            "'".mysqli_real_escape_string($db, $samwise)."')";
 
     $result = mysqli_query($db, $query);
     if(mysqli_affected_rows($db)!=1){
@@ -78,9 +78,25 @@ function create_follow($frodo, $samwise) {
     return true;
 }
 
+// FIXME: remove_follow
 
-function create_post($author, $body, $private = 0, $replyto = null, $replyparent = null) {
+
+function create_post($author, $body, $private = 0, $replyto = null) {
     $db = db();
+
+    $replyparent = null;
+    if(!empty($replyto)){
+        $query = "SELECT replyparent FROM messages WHERE id='".mysqli_real_escape_string($db, $replyto)."'";
+        $result = mysqli_query($db, $query);
+        if(mysqli_num_rows($result)==1){
+            $val = mysqli_fetch_row($result)[0];
+            if(!empty($val)){
+                $replyparent = $val;
+            }else{
+                $replyparent = $replyto;
+            }
+        }
+    }
 
     $query = "INSERT INTO messages (author, body, private, replyto, replyparent) VALUES
         ('".mysqli_real_escape_string($db, $author)."',
@@ -97,15 +113,53 @@ function create_post($author, $body, $private = 0, $replyto = null, $replyparent
 
     $id = mysqli_insert_id($db);
 
-    // TODO: Insert into follower queues
 
-    // TODO: Insert into public queue
+    // FIXME: Mentions
 
+
+    // Insert into own queue
+    $query = "INSERT INTO queue (owner, message) VALUES (
+        '".mysqli_real_escape_string($db, $author)."',
+        '".mysqli_real_escape_string($db, $id)."')";
+    mysqli_query($db, $query);
+
+    if (empty($private)){
+
+        $query = "SELECT samwise FROM follows WHERE frodo='".mysqli_real_escape_string($db, $author)."'";
+        $result = mysqli_query($db, $query);
+        while($row = mysqli_fetch_row($result)){
+            $samwise = $row[0];
+            error_log("Samwise is $samwise");
+            $inquery = "INSERT INTO queue (owner, message) VALUES (
+                '".mysqli_real_escape_string($db, $samwise)."',
+                '".mysqli_real_escape_string($db, $id)."')";
+            mysqli_query($db, $inquery);
+        }
+
+        // TODO: Insert into public queue
+
+    } else {
+
+
+    }
     return $id;
 
 }
 
+//FIXME: remove_post
 
+
+$GLOBALS['user_cache'];
+function get_user($id) {
+    $db = db();
+    $query = "SELECT * FROM user WHERE 
+}
+
+
+function get_user_queue($id, $offset = 0){
+   
+
+}
 
 
 ?>
