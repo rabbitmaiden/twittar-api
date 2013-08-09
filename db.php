@@ -124,22 +124,16 @@ function create_post($author, $body, $private = 0, $replyto = null) {
             '".mysqli_real_escape_string($db, $id)."')";
         mysqli_query($db, $query);
 
-
-        $query = "SELECT samwise FROM follows WHERE frodo='".mysqli_real_escape_string($db, $author)."'";
-        $result = mysqli_query($db, $query);
-        while($row = mysqli_fetch_row($result)){
-            $samwise = $row[0];
-            error_log("Samwise is $samwise");
+        $followers = get_followers($author);
+        foreach($followers as $samwise){
             $inquery = "INSERT INTO queue (owner, message) VALUES (
                 '".mysqli_real_escape_string($db, $samwise)."',
                 '".mysqli_real_escape_string($db, $id)."')";
             mysqli_query($db, $inquery);
         }
 
-        // TODO: Insert into public queue
-
-    } else {
-
+        $query = "INSERT INTO publicqueue VALUES ('".mysqli_real_escape_string($db, $id)."')";
+        $result = mysqli_query($db, $query);        
 
     }
     return $id;
@@ -166,6 +160,19 @@ function get_user($id) {
     $user = mysqli_fetch_assoc($result);
     $GLOBALS['user_cache'][$id] = $user;
     return $user;
+}
+
+function get_followers($frodo) {
+    $query = "SELECT samwise FROM follows WHERE frodo='".mysqli_real_escape_string($db, $frodo)."'";
+    $result = mysqli_query($db, $query);
+    if(empty($result)){
+        return array();
+    }
+    $followers = array();
+    while($row = mysqli_fetch_row($result)){
+        $followers[] = $row[0];
+    }
+    return $followers;
 }
 
 function get_post($id) {
@@ -202,9 +209,8 @@ function get_user_queue($id, $offset = 0){
     
     $query .= "ORDER BY message DESC";
 
-    $result = mysqli_query($db, $query);
-    
-    if(!empty($result)){
+    $result = mysqli_query($db, $query) or error_log(mysqli_error($db));
+    if(empty($result)){
         return error("Could not load user queue for user $id");
     }
 
@@ -214,6 +220,11 @@ function get_user_queue($id, $offset = 0){
     }
 
     return $posts;
+}
+
+function get_public_queue() {
+
+
 }
 
 
