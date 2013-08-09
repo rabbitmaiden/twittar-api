@@ -44,6 +44,19 @@ CREATE TABLE `messages` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `publicqueue`
+--
+
+DROP TABLE IF EXISTS `publicqueue`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `publicqueue` (
+  `message` int(11) NOT NULL,
+  PRIMARY KEY (`message`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `queue`
 --
 
@@ -80,4 +93,4 @@ CREATE TABLE `user` (
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-08-09 17:23:07
+-- Dump completed on 2013-08-09 18:04:53
