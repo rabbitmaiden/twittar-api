@@ -123,7 +123,7 @@ function create_post($author, $body, $private = 0, $replyto = null) {
         '".mysqli_real_escape_string($db, $id)."')";
     mysqli_query($db, $query);
 
-    if (empty($private)){
+    if (empty($replyto) && empty($private)){
 
         $query = "SELECT samwise FROM follows WHERE frodo='".mysqli_real_escape_string($db, $author)."'";
         $result = mysqli_query($db, $query);
@@ -149,12 +149,24 @@ function create_post($author, $body, $private = 0, $replyto = null) {
 //FIXME: remove_post
 
 
-$GLOBALS['user_cache'];
+$GLOBALS['user_cache'] = array();
 function get_user($id) {
-    $db = db();
-    $query = "SELECT * FROM user WHERE 
-}
+    if(!empty($GLOBALS['user_cache'][$id])){
+        return $GLOBALS['user_cache'][$id];
+    }
 
+    // Redis here?
+
+    $db = db();
+    $query = "SELECT id, username, icon FROM user WHERE id='".mysqli_real_escape_string($db, $id).'"';
+    $result = mysqli_query($db, $query);
+    if(mysqli_num_rows($result)!=1){
+        return false;
+    }
+    $user = mysqli_fetch_assoc($result);
+    $GLOBALS['user_cache'][$id] = $user;
+    return $user;
+}
 
 function get_user_queue($id, $offset = 0){
    
