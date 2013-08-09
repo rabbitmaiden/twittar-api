@@ -198,20 +198,25 @@ function get_post($id) {
     return $post;
 }
 
-function get_user_queue($id, $offset = 0){
+function get_queue($id = null, $offset = 0){
     $db = db();
-    $query = "SELECT message FROM queue WHERE owner='".mysqli_real_escape_string($db, $id)."'";
+
+    if(empty($id)) {
+        $query = "SELECT message FROM publicqueue ";
+    } else {
+        $query = "SELECT message FROM queue WHERE owner='".mysqli_real_escape_string($db, $id)."' ";
+    }
 
     $offset = intval($offset);
     if(!empty($offset) && $offset > 0 ){
         $query .= ' OFFSET '.mysqli_real_escape_string($db, $offset);
     }
     
-    $query .= "ORDER BY message DESC";
+    $query .= " ORDER BY message DESC";
 
     $result = mysqli_query($db, $query) or error_log(mysqli_error($db));
     if(empty($result)){
-        return error("Could not load user queue for user $id");
+        return error("Could not load queue");
     }
 
     $posts = array();
@@ -221,11 +226,5 @@ function get_user_queue($id, $offset = 0){
 
     return $posts;
 }
-
-function get_public_queue() {
-
-
-}
-
 
 ?>
