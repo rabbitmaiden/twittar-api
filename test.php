@@ -1,6 +1,6 @@
 <?php
 // Lame smoke tests
-include('db.php');
+include('common.php');
 
 $user = array(
     "username"=>"alice".mt_rand(0,1000),

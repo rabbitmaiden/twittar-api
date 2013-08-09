@@ -10,11 +10,6 @@ function db() {
     return $db;
 }
 
-function error($msg) {
-    error_log("Error: $msg");
-    return array("error"=>$msg);
-}
-
 function create_user($username, $password, $icon = null) {
     $db = db();
 
