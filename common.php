@@ -16,6 +16,11 @@ function input($name) {
     return $value;
 }
 
+function output($data) {
+    header("Content-Type: Text/Plain");
+    echo json_encode($data);
+    exit;
+}
 
 
 ?>
