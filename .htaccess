@@ -1,5 +1,4 @@
 RewriteEngine On
-RewriteBase /api/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /api.php [L]
+RewriteRule . /index.php [L]
