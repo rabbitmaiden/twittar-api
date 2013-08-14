@@ -56,7 +56,7 @@ function validate_token($id, $token) {
             return true;
         }
     }
-    return error("Invalid Token");
+    return false;
 }
 
 function create_follow($frodo, $samwise) {
