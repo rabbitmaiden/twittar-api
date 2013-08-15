@@ -171,6 +171,20 @@ function get_followers($frodo) {
     return $followers;
 }
 
+function get_follows($samwise) {
+    $db = db();
+    $query = "SELECT frodo FROM follows WHERE samwise='".mysqli_real_escape_string($db, $samwise)."'";
+    $result = mysqli_query($db, $query);
+    if(empty($result)){
+        return array();
+    }
+    $follows = array();
+    while($row = mysqli_fetch_row($result)){
+        $follows[] = $row[0];
+    }
+    return $follows;
+}
+
 function get_post($id) {
     $db = db();
     $query = "SELECT * FROM messages WHERE id='".mysqli_real_escape_string($db, $id)."'";

@@ -7,9 +7,13 @@ function error($msg) {
     return array("error"=>$msg);
 }
 
-function input($name) {
+function input($name, $required = true) {
     if (empty($_REQUEST[$name])) {
-        return null;
+        if($required) {
+            fatal("Missing input parameter: $name");
+        } else {
+            return null;
+        }
     }
 
     $value = filter_var($_REQUEST[$name], FILTER_SANITIZE_STRING);
@@ -23,16 +27,12 @@ function output($data) {
 }
 
 function fatal($msg){
-    return output(error($msg));
+    output(error($msg));
 }
 
 function is_logged_in() {
     $userid = input('userid');
     $token = input('token');
-    if(empty($userid) || empty($token)){
-        return false;
-    }
-
     return validate_token($userid, $token);
 }
 
